@@ -24,11 +24,11 @@ build: ## build environment
 
 .PHONY: composer-install
 composer-install: ## install project dependencies
-		$(compose) run --rm php sh -lc 'xoff;COMPOSER_MEMORY_LIMIT=-1 composer install'
+		$(compose) run --rm php sh -lc 'COMPOSER_MEMORY_LIMIT=-1 composer install'
 
 .PHONY: composer-update
 composer-update: ## update project dependencies
-		$(compose) run --rm php sh -lc 'xoff;COMPOSER_MEMORY_LIMIT=-1 composer update'
+		$(compose) run --rm php sh -lc 'COMPOSER_MEMORY_LIMIT=-1 composer update'
 
 .PHONY: up
 up: ## start all containers
@@ -66,14 +66,6 @@ test: ## run functional tests
 unit: ## run unit tests
 		$(compose) run php sh -lc './vendor/bin/phpspec run --verbose'
 
-.PHONY: xon
-xon: ## activate xdebug
-		$(compose) exec -T php sh -lc 'xon'
-
-.PHONY: xoff
-xoff: ## deactivate xdebug
-		$(compose) exec -T php sh -lc 'xoff'
-
 .PHONY: sh
 sh: ## opens a container shell (usage: make s=php sh)
 		$(compose) exec $(s) sh -l
@@ -84,7 +76,7 @@ logs: ## show container logs (usage: make s=php logs)
 
 .PHONY: env
 env: ## setup environment vars
-		$(compose) exec -T php sh -lc 'cp .env.dist .env'
+		$(compose) run -T php sh -lc 'cp .env.dist .env'
 
 .PHONY: help
 help: ## show this help
