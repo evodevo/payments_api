@@ -1,0 +1,40 @@
+version: "2"
+services:
+  test-mysql:
+    container_name: test-mysql
+    image: mysql
+    command: ["--default-authentication-plugin=mysql_native_password"]
+    env_file:
+      - ./docker/.env
+    environment:
+      MYSQL_DATABASE: payments_api_test
+    tmpfs:
+      - /var/lib/mysql
+    ports:
+      - "3307:3306"
+  test-php:
+    container_name: test-php
+    build: ./docker/php-fpm
+    entrypoint: ["/usr/local/bin/dockerize", "-wait", "tcp://test-mysql:3306"]
+    command: ["/usr/sbin/php-fpm7", "--nodaemonize"]
+    volumes:
+      - .:/home/nonroot/payments_api
+    env_file:
+      - ./docker/.env
+    environment:
+      - APP_ENV=test
+    links:
+      - test-mysql
+  test-nginx:
+    container_name: test-nginx
+    build: ./docker/nginx
+    ports:
+      - "8081:80"
+    volumes_from:
+      - test-php
+    env_file:
+      - ./docker/.env
+    environment:
+      - PHP_FPM_HOST=test-php
+    links:
+      - test-php

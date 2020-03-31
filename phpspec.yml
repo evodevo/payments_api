@@ -1,0 +1,4 @@
+suites:
+  default:
+    spec_path: 'tests/'
+formatter.name: pretty

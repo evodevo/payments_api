@@ -1,0 +1,26 @@
+default:
+    suites:
+        default:
+            paths:
+                - '%paths.base%/tests/features'
+            contexts:
+                - PaymentsAPI\Tests\Behat\PaymentsApiContext
+                - Ulff\BehatRestApiExtension\Context\RestApiContext
+
+    extensions:
+        FriendsOfBehat\SymfonyExtension:
+            bootstrap: ~
+            kernel:
+                class: PaymentsAPI\Infrastructure\Kernel
+                path: ~
+                environment: ~
+                debug: ~
+        Ulff\BehatRestApiExtension\ServiceContainer\BehatRestApiExtension: ~
+        Codifico\ParameterBagExtension\ServiceContainer\ParameterBagExtension:
+            parameter_bag:
+                class: Codifico\ParameterBagExtension\Bag\InMemoryPlaceholderBag
+        Behat\MinkExtension:
+            sessions:
+                symfony:
+                    symfony: ~
+            base_url: 'http://test-nginx'

@@ -1,0 +1,30 @@
+doctrine:
+    dbal:
+        url: '%env(resolve:DATABASE_URL)%'
+        types:
+            TransactionStatus:  PaymentsAPI\Infrastructure\Persistence\Doctrine\Type\TransactionStatus
+            UserId:  PaymentsAPI\Infrastructure\Persistence\Doctrine\Type\UserIdType
+            TransactionId:  PaymentsAPI\Infrastructure\Persistence\Doctrine\Type\TransactionIdType
+
+        # IMPORTANT: You MUST configure your server version,
+        # either here or in the DATABASE_URL env var (see .env file)
+        #server_version: '5.7'
+    orm:
+        auto_generate_proxy_classes: true
+        naming_strategy: doctrine.orm.naming_strategy.underscore_number_aware
+        auto_mapping: true
+        mappings:
+            Money:
+                is_bundle: false
+                type: xml
+                dir: '%kernel.project_dir%/src/Infrastructure/Persistence/Doctrine/mapping/money'
+                prefix: 'Money'
+                alias: Money
+            PaymentsAPI:
+                is_bundle: false
+                type: xml
+                dir: '%kernel.project_dir%/src/Infrastructure/Persistence/Doctrine/mapping/transaction'
+                prefix: 'PaymentsAPI\Domain'
+                alias: PaymentsAPI\Domain
+
+

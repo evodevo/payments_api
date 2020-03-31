@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
+                          http://www.doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+    <entity name="PaymentsAPI\Domain\Entity\Transaction" table="transactions">
+        <id name="id" column="id" type="TransactionId">
+            <generator />
+        </id>
+        <embedded name="recipient" class="PaymentsAPI\Domain\ValueObject\Recipient" column-prefix="recipient_" />
+        <embedded name="money" class="Money\Money" use-column-prefix="false" />
+        <embedded name="fee" class="Money\Money" column-prefix="fee_" />
+        <field name="userId" type="UserId" />
+        <field name="details" length="512" nullable="true" />
+        <field name="confirmationCode" type="integer" />
+        <field name="status" type="TransactionStatus">
+            <options>
+                <option name="default">created</option>
+            </options>
+        </field>
+        <field name="createdAt" type="datetime">
+            <options>
+                <option name="default">CURRENT_TIMESTAMP</option>
+            </options>
+        </field>
+        <indexes>
+            <index name="user_id_index" columns="user_id" />
+            <index name="user_id_currency_index" columns="user_id,currency" />
+        </indexes>
+    </entity>
+</doctrine-mapping>

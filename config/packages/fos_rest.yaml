@@ -1,0 +1,17 @@
+# Read the documentation: https://symfony.com/doc/master/bundles/FOSRestBundle/index.html
+fos_rest:
+    param_fetcher_listener: true
+    body_converter:
+      enabled: true
+      validate: true
+    exception:
+        codes:
+            PaymentsAPI\Infrastructure\Http\Exception\ValidationException: 400
+            PaymentsAPI\Domain\Exception\AlreadyConfirmed: 409
+            PaymentsAPI\Domain\Exception\InvalidConfirmationCode: 422
+            PaymentsAPI\Domain\Exception\TooManyTransactions: 429
+            PaymentsAPI\Domain\Exception\TransferLimitReached: 403
+            Doctrine\ORM\EntityNotFoundException: 404
+    format_listener:
+        rules:
+            - { path: ^/, prefer_extension: false, fallback_format: json, priorities: [ json ] }
