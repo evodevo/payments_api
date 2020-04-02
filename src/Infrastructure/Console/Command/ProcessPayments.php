@@ -77,7 +77,9 @@ class ProcessPayments extends Command
 
         $totalConfirmed = $this->transactionRepository->getTotalConfirmed();
 
-        $totalProcessed = $processedBatchSize = $this->processTransactionHandler->handle($batchSize);
+        $totalProcessed = $processedBatchSize = $this->processTransactionHandler->handle(
+            new ProcessTransactions($batchSize)
+        );
 
         $output->writeln("Processed [{$totalProcessed}/{$totalConfirmed}]");
 
