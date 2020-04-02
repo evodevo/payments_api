@@ -4,6 +4,8 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices/configuration.html#application-related-configuration
 parameters:
+    standard_fee_percent: 10.0
+    discounted_fee_percent: 5.0
 
 services:
     # default configuration for services in *this* file
@@ -30,7 +32,18 @@ services:
 
     PaymentsAPI\Domain\Service\FeeCalculator\VolumeDiscountedCalculator:
         arguments:
-            $feeCalculator: '@PaymentsAPI\Domain\Service\FeeCalculator\FixedPercentageCalculator'
+            $defaultFeeCalculator: '@PaymentsAPI\Domain\Service\FeeCalculator\StandardFeeCalculator'
+            $discountedFeeCalculator: '@PaymentsAPI\Domain\Service\FeeCalculator\DiscountedFeeCalculator'
+
+    PaymentsAPI\Domain\Service\FeeCalculator\StandardFeeCalculator:
+        class: PaymentsAPI\Domain\Service\FeeCalculator\PercentageFeeCalculator
+        arguments:
+            $feePercent: '%standard_fee_percent%'
+
+    PaymentsAPI\Domain\Service\FeeCalculator\DiscountedFeeCalculator:
+        class: PaymentsAPI\Domain\Service\FeeCalculator\PercentageFeeCalculator
+        arguments:
+            $feePercent: '%discounted_fee_percent%'
 
     Money\MoneyParser: '@Money\Parser\DecimalMoneyParser'
 

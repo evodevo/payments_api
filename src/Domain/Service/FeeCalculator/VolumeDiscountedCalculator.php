@@ -8,6 +8,7 @@ use Money\Money;
 use PaymentsAPI\Domain\Entity\Transaction;
 use PaymentsAPI\Domain\Repository\TransactionRepository;
 use PaymentsAPI\Domain\Service\FeeCalculator;
+use PaymentsAPI\Domain\ValueObject\UserId;
 
 /**
  * Class VolumeDiscountedCalculator
@@ -19,22 +20,25 @@ class VolumeDiscountedCalculator implements FeeCalculator
 
     const DISCOUNT_ELIGIBILITY_THRESHOLD = 100;
 
-    const DISCOUNT_TIME_PERIOD = '1 day';
+    /**
+     * @var FeeCalculator
+     */
+    protected $defaultFeeCalculator;
 
     /**
      * @var FeeCalculator
      */
-    protected $feeCalculator;
+    protected $discountedFeeCalculator;
 
     /**
      * @var TransactionRepository
      */
     protected $transactionRepository;
 
-    /**
-     * @var float
-     */
-    protected $discountedFeePercent;
+//    /**
+//     * @var float
+//     */
+//    protected $discountedFeePercent;
 
     /**
      * @var int
@@ -42,52 +46,50 @@ class VolumeDiscountedCalculator implements FeeCalculator
     protected $discountEligibilityThreshold;
 
     /**
-     * @var string
-     */
-    protected $discountTimePeriod;
-
-    /**
      * VolumeDiscountedCalculator constructor.
-     * @param FeeCalculator $feeCalculator
+     * @param FeeCalculator $defaultFeeCalculator
+     * @param FeeCalculator $discountedFeeCalculator
      * @param TransactionRepository $transactionRepository
-     * @param float $discountedFeePercent
+//     * @param float $discountedFeePercent
      * @param int $discountEligibilityThreshold
-     * @param string $discountTimePeriod
      */
     public function __construct(
-        FeeCalculator $feeCalculator,
+        FeeCalculator $defaultFeeCalculator,
+        FeeCalculator $discountedFeeCalculator,
         TransactionRepository $transactionRepository,
-        float $discountedFeePercent = self::DISCOUNTED_FEE_PERCENT,
-        int $discountEligibilityThreshold = self::DISCOUNT_ELIGIBILITY_THRESHOLD,
-        string $discountTimePeriod = self::DISCOUNT_TIME_PERIOD
+//        float $discountedFeePercent = self::DISCOUNTED_FEE_PERCENT,
+        int $discountEligibilityThreshold = self::DISCOUNT_ELIGIBILITY_THRESHOLD
     ) {
-        $this->feeCalculator = $feeCalculator;
+        $this->defaultFeeCalculator = $defaultFeeCalculator;
+        $this->discountedFeeCalculator = $discountedFeeCalculator;
         $this->transactionRepository = $transactionRepository;
-        $this->discountedFeePercent = $discountedFeePercent;
+//        $this->discountedFeePercent = $discountedFeePercent;
         $this->discountEligibilityThreshold = $discountEligibilityThreshold;
-        $this->discountTimePeriod = $discountTimePeriod;
     }
 
     /**
      * @param Transaction $transaction
      * @return Money
+     * @throws \Exception
      */
     public function calculate(Transaction $transaction): Money
     {
-        if ($this->isEligibleForVolumeDiscount($transaction)) {
-            return $transaction->getMoney()->multiply($this->discountedFeePercent / 100);
+        if ($this->isEligibleForVolumeDiscount($transaction->getUserId())) {
+//            return $transaction->getAmount()->multiply($this->discountedFeePercent)->divide(100);
+            return $this->discountedFeeCalculator->calculate($transaction);
         }
 
-        return $this->feeCalculator->calculate($transaction);
+        return $this->defaultFeeCalculator->calculate($transaction);
     }
 
     /**
-     * @param Transaction $transaction
+     * @param UserId $userId
      * @return bool
+     * @throws \Exception
      */
-    private function isEligibleForVolumeDiscount(Transaction $transaction): bool
+    private function isEligibleForVolumeDiscount(UserId $userId): bool
     {
-        $dailyVolume = $this->getDailyVolume($transaction);
+        $dailyVolume = $this->getDailyVolume($userId);
         if ($dailyVolume > $this->discountEligibilityThreshold * 100) {
             return true;
         }
@@ -96,14 +98,15 @@ class VolumeDiscountedCalculator implements FeeCalculator
     }
 
     /**
-     * @param Transaction $transaction
+     * @param UserId $userId
      * @return int
+     * @throws \Exception
      */
-    private function getDailyVolume(Transaction $transaction): int
+    private function getDailyVolume(UserId $userId): int
     {
-        $startTime = $transaction->getCreatedAt();
-        $endTime = (clone $startTime)->add(\DateInterval::createFromDateString($this->discountTimePeriod));
+        $startDate = new \DateTime('today');
+        $endDate = (clone $startDate)->setTime(23, 59, 59, 999);
 
-        return $this->transactionRepository->getVolume($transaction->getUserId(), $startTime, $endTime);
+        return $this->transactionRepository->getVolume($userId, $startDate, $endDate);
     }
 }

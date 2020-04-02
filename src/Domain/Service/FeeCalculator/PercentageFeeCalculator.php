@@ -9,10 +9,10 @@ use PaymentsAPI\Domain\Entity\Transaction;
 use PaymentsAPI\Domain\Service\FeeCalculator;
 
 /**
- * Class FixedPercentageCalculator
+ * Class PercentageFeeCalculator
  * @package PaymentsAPI\Domain\Service\FeeCalculator
  */
-class FixedPercentageCalculator implements FeeCalculator
+class PercentageFeeCalculator implements FeeCalculator
 {
     const DEFAULT_FEE_PERCENT = 10.0;
 
@@ -36,6 +36,6 @@ class FixedPercentageCalculator implements FeeCalculator
      */
     public function calculate(Transaction $transaction): Money
     {
-        return $transaction->getMoney()->multiply($this->feePercent)->divide(100);
+        return $transaction->getAmount()->multiply($this->feePercent)->divide(100);
     }
 }

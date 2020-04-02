@@ -88,7 +88,7 @@ class TransactionFactory
             $this->codeGenerator->generate()
         );
 
-        $transaction->updateFee($this->feeCalculator->calculate($transaction));
+        $transaction->applyFee($this->feeCalculator->calculate($transaction));
 
         return $transaction;
     }
