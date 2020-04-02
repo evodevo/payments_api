@@ -50,7 +50,7 @@ interface TransactionRepository
      * @param Currency $currency
      * @return int
      */
-    public function getTotalAmountPerUserForCurrency(UserId $userId, Currency $currency): int;
+    public function getUserTransferredAmountForCurrency(UserId $userId, Currency $currency): int;
 
     /**
      * @param $userId
