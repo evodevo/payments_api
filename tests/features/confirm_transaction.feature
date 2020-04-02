@@ -37,9 +37,9 @@ Feature:
       "code": 111
     }
     """
-    Then the response status code should be 409
+    Then the response status code should be 422
     And the response JSON should be a single object
-    And the response JSON should have "code" field with value 409
+    And the response JSON should have "code" field with value 422
     And the response JSON should have "message" field
 
 

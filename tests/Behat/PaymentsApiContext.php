@@ -8,6 +8,7 @@ use Behat\Behat\Context\Context;
 use Behat\Gherkin\Node\PyStringNode;
 use Behat\Mink\Driver\DriverInterface;
 use Behat\MinkExtension\Context\RawMinkContext;
+use PaymentsAPI\Application\Command\ProcessTransactions;
 use PaymentsAPI\Application\Command\ProcessTransactionsHandler;
 use Symfony\Component\BrowserKit\Client;
 
@@ -50,7 +51,7 @@ class PaymentsApiContext extends RawMinkContext implements Context
      */
     public function theSystemProcessedConfirmedTransactions()
     {
-        $this->processTransactionsHandler->handle(null);
+        $this->processTransactionsHandler->handle(new ProcessTransactions());
     }
 
     /**
