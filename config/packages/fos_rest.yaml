@@ -7,7 +7,7 @@ fos_rest:
     exception:
         codes:
             PaymentsAPI\Infrastructure\Http\Exception\ValidationException: 400
-            PaymentsAPI\Domain\Exception\AlreadyConfirmed: 409
+            PaymentsAPI\Domain\Exception\ConfirmationFailed: 422
             PaymentsAPI\Domain\Exception\InvalidConfirmationCode: 422
             PaymentsAPI\Domain\Exception\TooManyTransactions: 429
             PaymentsAPI\Domain\Exception\TransferLimitReached: 403

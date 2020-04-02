@@ -6,7 +6,7 @@ namespace PaymentsAPI\Domain\Entity;
 
 use Money\Currency;
 use Money\Money;
-use PaymentsAPI\Domain\Exception\AlreadyConfirmed;
+use PaymentsAPI\Domain\Exception\ConfirmationFailed;
 use PaymentsAPI\Domain\Exception\InvalidConfirmationCode;
 use PaymentsAPI\Domain\ValueObject\Recipient;
 use PaymentsAPI\Domain\ValueObject\TransactionId;
@@ -23,6 +23,8 @@ class Transaction
     const STATUS_COMPLETED = 'completed';
     const STATUS_FAILED = 'failed';
 
+    const DEFAULT_FEE_PERCENT = 10.0;
+
     /**
      * @var TransactionId
      */
@@ -34,9 +36,14 @@ class Transaction
     private $userId;
 
     /**
-     * @var Money
+     * @var int
      */
-    private $money;
+    private $amount;
+
+    /**
+     * @var Currency
+     */
+    private $currency;
 
     /**
      * @var Recipient
@@ -59,9 +66,14 @@ class Transaction
     private $status = self::STATUS_CREATED;
 
     /**
-     * @var Money
+     * @var int
      */
     private $fee;
+
+    /**
+     * @var int
+     */
+    private $total;
 
     /**
      * @var \DateTime
@@ -84,13 +96,51 @@ class Transaction
         string $details,
         int $confirmationCode
     ) {
+        if (!$money->greaterThan(new Money(0, $money->getCurrency()))) {
+            throw new \InvalidArgumentException('Transfer amount cannot be negative');
+        }
+
         $this->userId = $userId;
-        $this->money = $money;
+        $this->amount = $money->getAmount();
+        $this->currency = $money->getCurrency();
+
+        // Initialize transaction with zero fee.
+        $this->applyFee(new Money(0, $this->currency));
+
         $this->recipient = $recipient;
         $this->details = $details;
         $this->confirmationCode = $confirmationCode;
-        $this->fee = new Money(0, $money->getCurrency());
+
         $this->createdAt = new \DateTime();
+    }
+
+    /**
+     * @param Money $fee
+     */
+    public function applyFee(Money $fee)
+    {
+        if (!$fee->getCurrency()->equals($this->currency)) {
+            throw new \InvalidArgumentException('Transaction fee must have the same currency as transaction');
+        }
+
+        if ($fee->lessThan(new Money(0, $this->currency))) {
+            throw new \InvalidArgumentException('Fee cannot be negative');
+        }
+
+        if ($this->status !== self::STATUS_CREATED) {
+            throw new \RuntimeException('Cannot update fee for an already confirmed transaction');
+        }
+
+        $this->fee = $fee->getAmount();
+        $this->total = $this->calculateTotal()->getAmount();
+    }
+
+    /**
+     * @return Money
+     */
+    private function calculateTotal()
+    {
+        return $this->getAmount()->add($this->getFee());
     }
 
     /**
@@ -98,22 +148,26 @@ class Transaction
      */
     public function confirm(int $code)
     {
-        if ($this->confirmationCode !== $code) {
-            throw new InvalidConfirmationCode('Confirmation code is invalid');
+        if ($this->status !== self::STATUS_CREATED) {
+            throw new ConfirmationFailed('Only new transactions can be confirmed');
         }
 
-        if (!$this->isWaitingConfirmation()) {
-            throw new AlreadyConfirmed('Transaction with code '.$code.' is already confirmed');
+        if ($this->confirmationCode !== $code) {
+            throw new InvalidConfirmationCode('Confirmation code is invalid');
         }
 
         $this->status = self::STATUS_CONFIRMED;
     }
 
     /**
-     * Changes transaction status to processed.
+     * Changes transaction status to completed.
      */
     public function complete()
     {
+        if ($this->status === self::STATUS_CREATED) {
+            throw new \RuntimeException('Cannot complete unconfirmed transaction');
+        }
+
         $this->status = self::STATUS_COMPLETED;
     }
 
@@ -123,31 +177,7 @@ class Transaction
      */
     public function exceedsAmount(Money $amount): bool
     {
-        return $this->money->greaterThan($amount);
-    }
-
-    /**
-     * @return TransactionId
-     */
-    public function getId(): TransactionId
-    {
-        return $this->id;
-    }
-
-    /**
-     * @return string
-     */
-    public function getDetails(): string
-    {
-        return $this->details;
-    }
-
-    /**
-     * @return Recipient
-     */
-    public function getRecipient(): Recipient
-    {
-        return $this->recipient;
+        return $this->getTotal()->greaterThan($amount);
     }
 
     /**
@@ -159,36 +189,28 @@ class Transaction
     }
 
     /**
-     * @param Money $fee
-     */
-    public function updateFee(Money $fee)
-    {
-        $this->fee = $fee;
-    }
-
-    /**
      * @param Currency $currency
      * @return bool
      */
     public function hasCurrency(Currency $currency): bool
     {
-        return $this->money->getCurrency()->equals($currency);
+        return $this->currency->equals($currency);
     }
 
     /**
      * @return Money
      */
-    public function getMoney(): Money
+    public function getTotal(): Money
     {
-        return $this->money;
+        return new Money($this->total, $this->currency);
     }
 
     /**
-     * @return Currency
+     * @return Money
      */
-    public function getCurrency(): Currency
+    public function getAmount(): Money
     {
-        return $this->money->getCurrency();
+        return new Money($this->amount, $this->currency);
     }
 
     /**
@@ -196,7 +218,15 @@ class Transaction
      */
     public function getFee(): Money
     {
-        return $this->fee;
+        return new Money($this->fee, $this->currency);
+    }
+
+    /**
+     * @return Currency
+     */
+    public function getCurrency(): Currency
+    {
+        return $this->currency;
     }
 
     /**
@@ -224,10 +254,26 @@ class Transaction
     }
 
     /**
-     * @return bool
+     * @return TransactionId
      */
-    private function isWaitingConfirmation(): bool
+    public function getId(): TransactionId
     {
-        return $this->status === self::STATUS_CREATED;
+        return $this->id;
+    }
+
+    /**
+     * @return string
+     */
+    public function getDetails(): string
+    {
+        return $this->details;
+    }
+
+    /**
+     * @return Recipient
+     */
+    public function getRecipient(): Recipient
+    {
+        return $this->recipient;
     }
 }
