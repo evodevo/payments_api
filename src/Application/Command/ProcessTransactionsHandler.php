@@ -37,12 +37,12 @@ class ProcessTransactionsHandler
     }
 
     /**
-     * @param $batchSize
+     * @param ProcessTransactions $processTransactions
      * @return int
      */
-    public function handle($batchSize)
+    public function handle(ProcessTransactions $processTransactions)
     {
-        $transactions = $this->transactionRepository->findConfirmed($batchSize);
+        $transactions = $this->transactionRepository->findConfirmed($processTransactions->getBatchSize());
 
         foreach ($transactions as $transaction) {
             $paymentProvider = $this->paymentProviderFactory->create($transaction);

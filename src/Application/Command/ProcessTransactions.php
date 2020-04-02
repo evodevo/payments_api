@@ -27,7 +27,7 @@ class ProcessTransactions
     /**
      * @return int|null
      */
-    public function getBatchSize(): int
+    public function getBatchSize(): ?int
     {
         return $this->batchSize;
     }
