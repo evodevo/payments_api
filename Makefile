@@ -78,6 +78,10 @@ logs: ## show container logs (usage: make s=php logs)
 env: ## setup environment vars
 		$(compose) run -T php sh -lc 'cp .env.dist .env'
 
+.PHONY: payments
+payments: ## process all confirmed transactions
+		$(compose) exec php sh -lc './bin/console p:p'
+
 .PHONY: help
 help: ## show this help
 	@cat $(MAKEFILE_LIST) | grep -e "^[a-zA-Z_\-]*: *.*## *" | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
