@@ -65,7 +65,7 @@ class DoctrineTransactionRepository extends ServiceEntityRepository implements T
     public function getVolume(UserId $userId, \DateTime $from, \DateTime $to): int
     {
         return (int)$this->createQueryBuilder('transaction')
-            ->select('COALESCE(SUM(transaction.money.amount), 0)')
+            ->select('COALESCE(SUM(transaction.amount), 0)')
             ->where('transaction.userId = :userId')
             ->andWhere('transaction.createdAt >= :from')
             ->andWhere('transaction.createdAt <= :to')
@@ -82,12 +82,13 @@ class DoctrineTransactionRepository extends ServiceEntityRepository implements T
      * @throws \Doctrine\ORM\NoResultException
      * @throws \Doctrine\ORM\NonUniqueResultException
      */
-    public function getTotalAmountPerUserForCurrency(UserId $userId, Currency $currency): int
+    public function getUserTransferredAmountForCurrency(UserId $userId, Currency $currency): int
     {
         return (int)$this->createQueryBuilder('transaction')
-            ->select('COALESCE(SUM(transaction.money.amount + transaction.fee.amount), 0)')
+//            ->select('COALESCE(SUM(transaction.money.amount + transaction.fee.amount), 0)')
+            ->select('COALESCE(SUM(transaction.total), 0)')
             ->where('transaction.userId = :userId')
-            ->andWhere('transaction.money.currency.code = :currency')
+            ->andWhere('transaction.currency.code = :currency')
             ->setParameter('userId', $userId)
             ->setParameter('currency', (string)$currency)
             ->getQuery()->getSingleScalarResult();
