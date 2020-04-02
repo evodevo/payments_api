@@ -79,8 +79,9 @@ class TransferLimitValidator implements TransactionValidator
 
         if ($transaction->exceedsAmount($remainingAmount)) {
             throw new TransferLimitReached(
-                'Transaction exceeds the allowed remaining transfer limit of ' .
-                $this->moneyFormatter->format($remainingAmount) . ' for currency ' . $transaction->getCurrency()
+                'Transaction total amount of ' . $this->moneyFormatter->format($transaction->getTotal()) .
+                ' ' . $transaction->getCurrency() . ' exceeds the allowed remaining transfer limit of ' .
+                $this->moneyFormatter->format($remainingAmount) . ' ' . $transaction->getCurrency()
             );
         }
     }

@@ -149,7 +149,7 @@ class Transaction
     public function confirm(int $code)
     {
         if ($this->status !== self::STATUS_CREATED) {
-            throw new ConfirmationFailed('Only new transactions can be confirmed');
+            throw new ConfirmationFailed('Only unconfirmed transactions can be confirmed');
         }
 
         if ($this->confirmationCode !== $code) {

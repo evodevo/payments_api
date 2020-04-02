@@ -28,7 +28,7 @@ Feature:
 
 #  Scenario: User gets transaction fee volume discount
 
-#  Scenario: User exceeds max allowed transfer limit
+#  Scenario: User exceeds max allowed transfer limit for USD
 
 
 
