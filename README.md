@@ -4,12 +4,12 @@ A simple payment processing REST API demo developed by applying Domain Driven De
 with Unit tests using phpspec, functional tests using Behat and development environment based on docker containers.
 
 
-To setup new docker dev environment:
+To setup new docker dev environment run the following command, it should do the magic:
 
 ```
 make dev
 ```
-NOTE: It requires docker and docker-compose version >= 2 to be installed. By default the API is accessible at 8080 port.
+NOTE: It requires docker and docker-compose version >= 2 to be installed. By default the API will be accessible at 8080 port.
 
 Generated API documentation is available at:
 
