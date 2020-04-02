@@ -74,6 +74,7 @@ class TransactionsFixtureLoader extends Fixture
 
         // A completed payment.
         $transaction5 = $this->transactionFactory->create($moneyEur, $userId, $recipient, $details);
+        $transaction5->confirm(111);
         $transaction5->complete();
 
         $this->transactionRepository->add($transaction5);
