@@ -14,9 +14,9 @@ use PaymentsAPI\Domain\Service\TransactionValidator;
 class TransferLimitValidator implements TransactionValidator
 {
     /**
-     * Allowed max transfer limit in cents.
+     * Allowed max transfer limit.
      */
-    const TRANSFER_LIMIT = 1000;
+    const DEFAULT_TRANSFER_LIMIT = 1000;
 
     /**
      * @var TransactionRepository
@@ -42,7 +42,7 @@ class TransferLimitValidator implements TransactionValidator
     public function __construct(
         TransactionRepository $transactionRepository,
         MoneyFormatter $moneyFormatter,
-        $transferLimit = self::TRANSFER_LIMIT
+        $transferLimit = self::DEFAULT_TRANSFER_LIMIT
     ) {
         $this->transactionRepository = $transactionRepository;
         $this->moneyFormatter = $moneyFormatter;
@@ -79,7 +79,7 @@ class TransferLimitValidator implements TransactionValidator
 
         if ($transaction->exceedsAmount($remainingAmount)) {
             throw new TransferLimitReached(
-                'Transaction exceeds the allowed remaining transfer amount of ' .
+                'Transaction exceeds the allowed remaining transfer limit of ' .
                 $this->moneyFormatter->format($remainingAmount) . ' for currency ' . $transaction->getCurrency()
             );
         }
@@ -91,7 +91,7 @@ class TransferLimitValidator implements TransactionValidator
      */
     private function getRemainingAmount(Transaction $transaction): Money
     {
-        $transferredAmount = $this->transactionRepository->getTotalAmountPerUserForCurrency(
+        $transferredAmount = $this->transactionRepository->getUserTransferredAmountForCurrency(
             $transaction->getUserId(),
             $transaction->getCurrency()
         );
