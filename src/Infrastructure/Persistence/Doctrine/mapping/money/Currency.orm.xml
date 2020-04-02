@@ -4,7 +4,7 @@
                   xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
                           http://www.doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
     <embeddable name="Money\Currency">
-        <field name="code" type="string" length="3" column="currency">
+        <field name="code" length="3" column="currency">
             <options>
                 <option name="fixed">true</option>
             </options>

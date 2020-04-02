@@ -8,9 +8,13 @@
             <generator />
         </id>
         <embedded name="recipient" class="PaymentsAPI\Domain\ValueObject\Recipient" column-prefix="recipient_" />
-        <embedded name="money" class="Money\Money" use-column-prefix="false" />
-        <embedded name="fee" class="Money\Money" column-prefix="fee_" />
+        <!--<embedded name="money" class="Money\Money" use-column-prefix="false" />-->
+        <!--<embedded name="fee" class="Money\Money" column-prefix="fee_" />-->
+        <embedded name="currency" class="Money\Currency" use-column-prefix="false" />
         <field name="userId" type="UserId" />
+        <field name="amount" />
+        <field name="fee" />
+        <field name="total" />
         <field name="details" length="512" nullable="true" />
         <field name="confirmationCode" type="integer" />
         <field name="status" type="TransactionStatus">
