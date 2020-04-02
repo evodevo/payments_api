@@ -35,11 +35,6 @@ class VolumeDiscountedCalculator implements FeeCalculator
      */
     protected $transactionRepository;
 
-//    /**
-//     * @var float
-//     */
-//    protected $discountedFeePercent;
-
     /**
      * @var int
      */
@@ -57,13 +52,11 @@ class VolumeDiscountedCalculator implements FeeCalculator
         FeeCalculator $defaultFeeCalculator,
         FeeCalculator $discountedFeeCalculator,
         TransactionRepository $transactionRepository,
-//        float $discountedFeePercent = self::DISCOUNTED_FEE_PERCENT,
         int $discountEligibilityThreshold = self::DISCOUNT_ELIGIBILITY_THRESHOLD
     ) {
         $this->defaultFeeCalculator = $defaultFeeCalculator;
         $this->discountedFeeCalculator = $discountedFeeCalculator;
         $this->transactionRepository = $transactionRepository;
-//        $this->discountedFeePercent = $discountedFeePercent;
         $this->discountEligibilityThreshold = $discountEligibilityThreshold;
     }
 
@@ -75,7 +68,6 @@ class VolumeDiscountedCalculator implements FeeCalculator
     public function calculate(Transaction $transaction): Money
     {
         if ($this->isEligibleForVolumeDiscount($transaction->getUserId())) {
-//            return $transaction->getAmount()->multiply($this->discountedFeePercent)->divide(100);
             return $this->discountedFeeCalculator->calculate($transaction);
         }
 

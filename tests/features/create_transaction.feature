@@ -22,6 +22,8 @@ Feature:
     And the response JSON should have "fee" field with value 2
     And the response JSON should have "status" field with value "created"
 
+#  Scenario: User tries to create invalid transaction
+
 #  Scenario: User exceeds transaction rate limit
 
 #  Scenario: User gets transaction fee volume discount
