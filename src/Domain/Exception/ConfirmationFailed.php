@@ -8,6 +8,6 @@ namespace PaymentsAPI\Domain\Exception;
  * Class AlreadyConfirmed
  * @package PaymentsAPI\Domain\Exception
  */
-class AlreadyConfirmed extends \RuntimeException
+class ConfirmationFailed extends \RuntimeException
 {
 }
