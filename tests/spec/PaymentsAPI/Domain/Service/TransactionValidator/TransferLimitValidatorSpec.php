@@ -81,7 +81,7 @@ class TransferLimitValidatorSpec extends ObjectBehavior
         Currency $currency,
         $amount
     ) {
-        $transactionRepository->getTotalAmountPerUserForCurrency($userId, $currency)->willReturn($amount);
+        $transactionRepository->getUserTransferredAmountForCurrency($userId, $currency)->willReturn($amount);
     }
 
     /**

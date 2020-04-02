@@ -44,7 +44,8 @@ class TransactionFactorySpec extends ObjectBehavior
     {
         $transaction = $this->getTestTransaction();
 
-        $fee = new Money('2', new Currency('EUR'));
+        $eur = new Currency('EUR');
+        $fee = new Money('2', $eur);
 
         $this->givenItCalculatesTransactionFee(
             $feeCalculator,
@@ -53,20 +54,22 @@ class TransactionFactorySpec extends ObjectBehavior
         );
         $this->givenItGeneratesConfirmationCode($codeGenerator, 111);
 
-        $eur = new Currency('EUR');
+
         $money = new Money('200', $eur);
         $userId = new UserId(1);
         $recipient = new Recipient('12345', 'John Doe');
         $details = 'Transaction number one';
+        $total = new Money('202', $eur);
 
         $result = $this->create($money, $userId, $recipient, $details);
 
         $result->getUserId()->shouldBe($userId);
         $result->getDetails()->shouldBe($details);
         $result->getRecipient()->shouldBe($recipient);
-        $result->getMoney()->shouldBe($money);
+        $result->getAmount()->equals($money)->shouldBe(true);
         $result->getCurrency()->shouldBe($eur);
-        $result->getFee()->shouldBe($fee);
+        $result->getFee()->equals($fee)->shouldBe(true);
+        $result->getTotal()->equals($total)->shouldBe(true);
         $result->getStatus()->shouldBe(Transaction::STATUS_CREATED);
         $result->getCreatedAt()->shouldBeAnInstanceOf(\DateTime::class);
     }

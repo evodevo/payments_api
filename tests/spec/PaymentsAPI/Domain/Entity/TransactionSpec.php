@@ -5,7 +5,7 @@ namespace spec\PaymentsAPI\Domain\Entity;
 use Money\Currency;
 use Money\Money;
 use PaymentsAPI\Domain\Entity\Transaction;
-use PaymentsAPI\Domain\Exception\AlreadyConfirmed;
+use PaymentsAPI\Domain\Exception\ConfirmationFailed;
 use PaymentsAPI\Domain\Exception\InvalidConfirmationCode;
 use PaymentsAPI\Domain\ValueObject\Recipient;
 use PaymentsAPI\Domain\ValueObject\UserId;
@@ -54,11 +54,12 @@ class TransactionSpec extends ObjectBehavior
     {
         $this->confirm(111);
 
-        $this->shouldThrow(AlreadyConfirmed::class)->duringConfirm(111);
+        $this->shouldThrow(ConfirmationFailed::class)->duringConfirm(111);
     }
 
     function it_can_be_completed()
     {
+        $this->confirm(111);
         $this->complete();
 
         $this->getStatus()->shouldBe(Transaction::STATUS_COMPLETED);
@@ -71,13 +72,16 @@ class TransactionSpec extends ObjectBehavior
         $this->getDetails()->shouldBe('Transaction number one updated');
     }
 
-    function it_can_update_fee()
+    function it_can_apply_fee()
     {
-        $money = new Money('200', new Currency('EUR'));
+        $eur = new Currency('EUR');
+        $money = new Money('200', $eur);
+        $total = new Money('1200', $eur);
 
-        $this->updateFee($money);
+        $this->applyFee($money);
 
-        $this->getFee()->shouldBe($money);
+        $this->getFee()->equals($money)->shouldBe(true);
+        $this->getTotal()->equals($total)->shouldBe(true);
     }
 
     function it_exceeds_amount()

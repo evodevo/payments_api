@@ -20,12 +20,20 @@ use Prophecy\Argument;
 class VolumeDiscountedCalculatorSpec extends ObjectBehavior
 {
     /**
-     * @param FeeCalculator|\PhpSpec\Wrapper\Collaborator $feeCalculator
+     * @param FeeCalculator|\PhpSpec\Wrapper\Collaborator $defaultFeeCalculator
+     * @param FeeCalculator|\PhpSpec\Wrapper\Collaborator $discountedFeeCalculator
      * @param TransactionRepository|\PhpSpec\Wrapper\Collaborator $transactionRepository
      */
-    function let(FeeCalculator $feeCalculator, TransactionRepository $transactionRepository)
-    {
-        $this->beConstructedWith($feeCalculator, $transactionRepository, 5.0, 100, '1 day');
+    function let(
+        FeeCalculator $defaultFeeCalculator,
+        FeeCalculator $discountedFeeCalculator,
+        TransactionRepository $transactionRepository
+    ) {
+        $this->beConstructedWith(
+            $defaultFeeCalculator,
+            $discountedFeeCalculator,
+            $transactionRepository
+        );
     }
 
     function it_is_initializable()
@@ -34,15 +42,19 @@ class VolumeDiscountedCalculatorSpec extends ObjectBehavior
     }
 
     /**
+     * @param FeeCalculator|\PhpSpec\Wrapper\Collaborator $discountedFeeCalculator
      * @param TransactionRepository|\PhpSpec\Wrapper\Collaborator $transactionRepository
      * @throws \Exception
      */
-    function it_applies_volume_discount(TransactionRepository $transactionRepository)
-    {
-        $transaction = $this->givenTransaction();
+    function it_uses_discounted_calculator_when_volume_is_high(
+        FeeCalculator $discountedFeeCalculator,
+        TransactionRepository $transactionRepository
+    ) {
+        $transaction = $this->createTransaction();
         $this->givenHighUserTransactionVolume($transactionRepository, $transaction->getUserId());
 
         $discountedFee = new Money('10', new Currency('EUR'));
+        $this->givenCalculatorReturnsFeeForTransaction($discountedFeeCalculator, $discountedFee, $transaction);
 
         $result = $this->calculate($transaction);
 
@@ -50,23 +62,28 @@ class VolumeDiscountedCalculatorSpec extends ObjectBehavior
     }
 
     /**
-     * @param FeeCalculator|\PhpSpec\Wrapper\Collaborator $feeCalculator
+     * @param FeeCalculator|\PhpSpec\Wrapper\Collaborator $defaultFeeCalculator
      * @param TransactionRepository|\PhpSpec\Wrapper\Collaborator $transactionRepository
      * @throws \Exception
      */
-    function it_uses_fallback_calculator_when_volume_is_too_low(
-        FeeCalculator $feeCalculator,
+    function it_uses_standard_calculator_when_volume_is_low(
+        FeeCalculator $defaultFeeCalculator,
         TransactionRepository $transactionRepository
     ) {
-        $transaction = $this->givenTransaction();
+        $transaction = $this->createTransaction();
         $this->givenLowUserTransactionVolume($transactionRepository, $transaction->getUserId());
 
         $fee = new Money('20', new Currency('EUR'));
-        $feeCalculator->calculate($transaction)->willReturn($fee)->shouldBeCalled();
+        $this->givenCalculatorReturnsFeeForTransaction($defaultFeeCalculator, $fee, $transaction);
 
         $result = $this->calculate($transaction);
 
         $result->equals($fee)->shouldBe(true);
+    }
+
+    private function givenCalculatorReturnsFeeForTransaction(FeeCalculator $feeCalculator, $fee, Transaction $transaction)
+    {
+        $feeCalculator->calculate($transaction)->willReturn($fee)->shouldBeCalled();
     }
 
     /**
@@ -91,7 +108,7 @@ class VolumeDiscountedCalculatorSpec extends ObjectBehavior
      * @return Transaction
      * @throws \Exception
      */
-    private function givenTransaction(): Transaction
+    private function createTransaction(): Transaction
     {
         return new Transaction(
             new UserId(1),

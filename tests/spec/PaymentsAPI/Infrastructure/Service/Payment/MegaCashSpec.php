@@ -26,7 +26,7 @@ class MegaCashSpec extends ObjectBehavior
      */
     function it_processes_transactions()
     {
-        $transaction = $this->givenTransaction();
+        $transaction = $this->createConfirmedTransaction();
 
         $this->process($transaction);
 
@@ -38,14 +38,17 @@ class MegaCashSpec extends ObjectBehavior
      * @return Transaction
      * @throws \Exception
      */
-    private function givenTransaction(): Transaction
+    private function createConfirmedTransaction(): Transaction
     {
-        return new Transaction(
+        $transaction = new Transaction(
             new UserId(1),
             new Money('200', new Currency('EUR')),
             new Recipient('12345', 'John Doe'),
             'Transaction number one',
             111
         );
+        $transaction->confirm(111);
+
+        return $transaction;
     }
 }

@@ -5,7 +5,7 @@ namespace spec\PaymentsAPI\Domain\Service\FeeCalculator;
 use Money\Currency;
 use Money\Money;
 use PaymentsAPI\Domain\Entity\Transaction;
-use PaymentsAPI\Domain\Service\FeeCalculator\FixedPercentageCalculator;
+use PaymentsAPI\Domain\Service\FeeCalculator\PercentageFeeCalculator;
 use PaymentsAPI\Domain\ValueObject\Recipient;
 use PaymentsAPI\Domain\ValueObject\UserId;
 use PhpSpec\ObjectBehavior;
@@ -14,7 +14,7 @@ use PhpSpec\ObjectBehavior;
  * Class FixedPercentageCalculatorSpec
  * @package spec\PaymentsAPI\Domain\Service\FeeCalculator
  */
-class FixedPercentageCalculatorSpec extends ObjectBehavior
+class PercentageFeeCalculatorSpec extends ObjectBehavior
 {
     function let()
     {
@@ -23,7 +23,7 @@ class FixedPercentageCalculatorSpec extends ObjectBehavior
 
     function it_is_initializable()
     {
-        $this->shouldHaveType(FixedPercentageCalculator::class);
+        $this->shouldHaveType(PercentageFeeCalculator::class);
     }
 
     /**

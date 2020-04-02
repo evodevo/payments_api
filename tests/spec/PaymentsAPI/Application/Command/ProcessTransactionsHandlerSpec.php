@@ -4,6 +4,7 @@ namespace spec\PaymentsAPI\Application\Command;
 
 use Money\Currency;
 use Money\Money;
+use PaymentsAPI\Application\Command\ProcessTransactions;
 use PaymentsAPI\Application\Command\ProcessTransactionsHandler;
 use PaymentsAPI\Domain\Entity\Transaction;
 use PaymentsAPI\Domain\Repository\TransactionRepository;
@@ -64,7 +65,7 @@ class ProcessTransactionsHandlerSpec extends ObjectBehavior
             $transaction2
         );
 
-        $this->handle(null)->shouldBeEqualTo(2);
+        $this->handle(new ProcessTransactions())->shouldBeEqualTo(2);
 
         $transactionRepository->add($transaction1)->shouldHaveBeenCalled();
         $transactionRepository->add($transaction2)->shouldHaveBeenCalled();
