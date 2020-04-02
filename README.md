@@ -31,6 +31,12 @@ To run functional tests:
 make test
 ```
 
+To process confirmed transactions:
+
+```
+make payments
+```
+
 To see the full command list:
 
 ```
